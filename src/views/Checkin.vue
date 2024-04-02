@@ -4,6 +4,7 @@ import { getCurrentInstance } from 'vue'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import VideoJSRecord from '@/components/VideoJSRecord.vue'
+import CheckinIssue from '../components/CheckinIssue.vue'
 
 export default {
     'name': 'Checkin',
@@ -16,7 +17,11 @@ export default {
           recordTimer: 0,
           shift: {
             site_name: ''
-          }
+          },
+          longitude: 0,
+          latitude :0,
+          log_type: 'IN',
+          isOpen: false,     
         }
     },
     mounted(){
@@ -32,7 +37,8 @@ export default {
     components: {
       Header,
       Footer,
-      VideoJSRecord
+      VideoJSRecord,
+      CheckinIssue,
     },
     methods:{
         async initialize(){
@@ -91,8 +97,13 @@ export default {
             }, false);		
 
         },
+        openModal() {
+            $('#CheckinIssueModal').show();
+            this.isOpen = true; // Emit an event to open the modal
+        },
         ready_checkin(res){
             let me = this;
+            this.log_type = me.res.data.log_type
             $('#profile-card').show();
             if (me.page.enrolled){
                 this.recordTimer = 5;
@@ -180,11 +191,12 @@ export default {
                 navigator.geolocation.getCurrentPosition(
                     position => {
                         page.position = position;
-
+                        this.longitude = position.coords.longitude
+                        this.latitude = position.coords.latitude
                         // check for get_site_lication before checkin
                         me.frappe.customApiCall(`api/method/one_fm.api.v1.face_recognition.get_site_location`,
-                            {employee_id:me.employee_data.employee_id, latitude:position.coords.latitude,
-                            longitude:position.coords.longitude}, 'POST').then(res=>{
+                            {employee_id:me.employee_data.employee_id, latitude:this.latitude,
+                            longitude:this.longitude}, 'POST').then(res=>{
                                 if(res.status_code==200){
                                     if (res.data.user_within_geofence_radius){
                                         me.res = res;
@@ -584,6 +596,14 @@ export default {
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                    <div class="col-xs-12">
+                                        <button class="btn btn-sm btn-primary btn-start" id="errorButton" @click="openModal()">
+                                            Not Working? Click here.
+                                        </button>
+                                        <CheckinIssue v-if="isOpen=true"  :log_type="this.log_type"  :longitude="this.longitude" :latitude="this.latitude"/>
+                                    </div>
+                            </div>
                             <div id="button-controls">
                                 <div class="row"  id="enrollSection">
                                     <div class="col-xs-12 alert alert-danger">
@@ -614,13 +634,6 @@ export default {
                                     <div class="col-xs-12">
                                         <button class="btn btn-sm btn-warning btn-start" id="hourlyButton">
                                             Hourly Check In
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-xs-12">
-                                        <button class="btn btn-sm btn-primary btn-start" id="errorButton">
-                                            Not Working? Click here.
                                         </button>
                                     </div>
                                 </div>
