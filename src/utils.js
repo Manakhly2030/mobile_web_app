@@ -3,7 +3,8 @@ export default {
     name: 'utils',
     Frappe: class Frappe {
         constructor(url, client_id){
-            this.url = url;
+            // this.url = url;
+            this.url = "http://localhost:8000"
             this.client_id = client_id;
             this.grant_type= "password";
             this.token = '';
