@@ -262,7 +262,7 @@ export default {
                                 me.$router.push('/checkin');
                                 setTimeout(()=>{
                                 window.location.href='/checkin' 
-                                }, 10000)
+                                }, 5000)
                                 
                                 }
                         } catch (e) {
