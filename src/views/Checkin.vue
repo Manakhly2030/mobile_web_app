@@ -235,7 +235,7 @@ export default {
             $('#cover-spin').show();
             return new Promise((resolve, reject) => {
                 let xhr = new XMLHttpRequest();
-                xhr.open("POST", "http://localhost:5000/anti-spoof", true);
+                xhr.open("POST", "https://face-recognition-gk4sqqu5rq-lm.a.run.app/anti-spoof", true);
                 xhr.setRequestHeader("Accept", "application/json");
                 xhr.setRequestHeader("X-Frappe-CSRF-Token", me.csrf_token);
                 xhr.setRequestHeader("Authorization", JSON.parse(localStorage.frappeUser).token);
