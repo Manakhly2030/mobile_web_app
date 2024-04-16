@@ -598,7 +598,7 @@ export default {
                             </div>
                             <div class="row">
                                     <div class="col-xs-12">
-                                        <button class="btn btn-sm btn-primary btn-start" id="errorButton" @click="openModal()">
+                                        <button class="btn btn-sm btn-primary btn-start" @click="openModal()">
                                             Not Working? Click here.
                                         </button>
                                         <CheckinIssue v-if="isOpen=true"  :log_type="this.log_type"  :longitude="this.longitude" :latitude="this.latitude"/>

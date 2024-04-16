@@ -17,10 +17,10 @@
                     </div>
                     <div v-if="this.issue_type_select === 'Other'" >
                         <h5 style="color:black;"> Reason:</h5>
-                        <textarea id="reason" class="custom_input" v-model="reason" name="reason" rows="2" cols="34">
+                        <textarea id="issue_details" class="custom_input" v-model="issue_details" name="issue_details" rows="2" cols="34">
                         </textarea>
                     </div>
-                <button v-on:click="submit" style="background-color: #B87852;border-radius: 10px;padding: 10px; width: 60vw;"> Sumbit </button>
+                <button v-on:click="submit" style="background-color: #B87852;border-radius: 10px;padding: 10px; width: 60vw;"> Submit </button>
                 </div>
             
         </div>
@@ -59,10 +59,10 @@
             this.isOpen = false; // Emit an event to open the modal
         },
         submit : function(){
-          this.frappe.customApiCall("api/method/one_fm.operations.doctype.employee_checkin_issue.employee_checkin_issue.create_checkin_issue",{
-            "employee": this.employee_data.name,"issue_type":this.issue_type_select, "log_type":this.log_type, "longitude": this.longitude, "latitude": this.latitude, "reason": this.reason}, 'POST').then(res=>{
+          this.frappe.customApiCall("api/method/one_fm.api.v1.employee_checkin_issue.create_employee_checkin_issue",{
+            "employee_id": this.employee_data.employee_id,"issue_type":this.issue_type_select, "log_type":this.log_type, "longitude": this.longitude, "latitude": this.latitude, "issue_details": this.issue_details}, 'POST').then(res=>{
                 if (res.message === "Success"){
-                  this.notify.success("Successfully Applied!")
+                  this.notify.success("Checkin Issue Successfully Applied!")
                   window.location.reload();
                 } else {
                   this.notify.error('Error', res.message)
