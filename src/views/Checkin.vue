@@ -235,13 +235,13 @@ export default {
             $('#cover-spin').show();
             return new Promise((resolve, reject) => {
                 let xhr = new XMLHttpRequest();
-                xhr.open("POST", "https://face-recognition-gk4sqqu5rq-lm.a.run.app/anti-spoof", true);
+                xhr.open("POST", me.frappe.face_recognition_url + "/anti-spoof", true);
                 xhr.setRequestHeader("Accept", "application/json");
                 xhr.setRequestHeader("X-Frappe-CSRF-Token", me.csrf_token);
                 xhr.setRequestHeader("Authorization", JSON.parse(localStorage.frappeUser).token);
 
                 let form_data = new FormData();
-                form_data.append("video_file", videoBlob, me.employee_data.user_id+".mp4");
+                form_data.append("video_file", videoBlob, me.employee_data.user_id +".mp4");
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState == XMLHttpRequest.DONE) {
                         if ([200, 201].includes(xhr.status)) {
@@ -251,9 +251,9 @@ export default {
                             if(r){
                                 if (me.page.enrolled){
                                     // Get current location again and then resume the checkin/out process
-                                    me.get_location(me.page, () => me.upload_file(videoBlob, "verify", me.res.data.log_type, 0))
+                                    me.get_location(me.page, () => me.upload_file(videoBlob, "verify", me.res.data.log_type, 1))
                                 } else {
-                                    me.upload_file(videoBlob, "enroll", me.res.data.log_type, 0)
+                                    me.upload_file(videoBlob, "enroll")
                                 }
                                 
                             } else {
@@ -482,8 +482,8 @@ export default {
             $('#cover-spin').show();
             let me = this;
             let method_map = {
-                'enroll': me.frappe.url+'/api/method/one_fm.api.v1.web.enroll',
-                'verify': me.frappe.url+'/api/method/one_fm.api.v1.web.verify'
+                'enroll': me.frappe.face_recognition_url + "/enroll",
+                'verify': me.frappe.face_recognition_url + "/verify"
             }
             return new Promise((resolve, reject) => {
                 let xhr = new XMLHttpRequest();
@@ -493,8 +493,12 @@ export default {
                 xhr.setRequestHeader("Authorization", JSON.parse(localStorage.frappeUser).token);
 
                 let form_data = new FormData();
-                form_data.append("file", file, me.employee_data.user_id+".mp4");
-                form_data.append("employee_id", me.employee_data.employee_id);
+                const file_name = me.employee_data.user_id + ".mp4"
+                form_data.append("video_file", file, file_name);
+                form_data.append("username", me.employee_data.user_id);
+                form_data.append("filename", file_name)
+                form_data.append("bucketpath", "hello")
+
                 if(method == 'verify'){
                     // let {timestamp} = cur_page.page.page.position;
                     let {latitude, longitude} = me.page.position.coords;
@@ -503,7 +507,7 @@ export default {
                     // form_data.append("timestamp", timestamp);
                     form_data.append("log_type", log_type);
                     form_data.append("skip_attendance", skip_attendance);
-                } 
+                }
 
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState == XMLHttpRequest.DONE) {
@@ -512,9 +516,35 @@ export default {
                         let r = null;
                         try {
                             r = JSON.parse(xhr.responseText);
-                            console.log(r);
-                            me.notify.success("Successful", r.data);
-                            // if(method=="verify"){}
+                            console.log(r, method);
+                            if (method == "enroll"){
+                                me.frappe.customApiCall(`api/method/one_fm.api.v1.face_recognition.enroll`, {employee_id:me.employee_data.employee_id}, 'POST').then(res=>{
+                                if([200, 201].includes(res.status_code)){
+                                    me.notify.success("Successful", res.data);
+                                }else if (res.status_code == 400){
+                                    me.notify.error("Error", res.error);
+                                } else{
+                                    me.notify.error("An error occurred during enrollment, Kindly contact admin")
+                                }
+                            })
+                            } else {
+                                me.frappe.customApiCall('api/method/one_fm.api.v1.face_recognition.verify_checkin_checkout', {
+                                    employee_id: me.employee_data.employee_id,
+                                    log_type: log_type,
+                                    skip_attendance: skip_attendance,
+                                    latitude: me.page.position.coords.latitude,
+                                    longitude: me.page.position.coords.longitude
+                                }, 'POST').then(res => {
+                                    if ([200, 201].includes(res.status_code)) {
+                                        me.notify.success("Successful", res.data);
+                                    } else if (res.status_code == 400) {
+                                        me.notify.error("Error", res.error);
+                                    } else {
+                                        me.notify.error("An error occurred during verification. Kindly contact admin");
+                                    }
+                                });
+                                
+                            }
                             $('.verification').hide();  
                             // me.initialize()
                             me.$router.push('/checkin');
@@ -524,15 +554,19 @@ export default {
                         } catch (e) {
                             r = xhr.responseText;
                         }
+                    } else if (xhr.status === 400) {
+                        $('#cover-spin').hide();
+                        // let response = JSON.parse(xhr.responseText);
+                        me.notify.error("Sorry, we couldn't verify your face. Please try again.",)
                     } else if (xhr.status === 403) {
                         $('#cover-spin').hide();
                         let response = JSON.parse(xhr.responseText);
-                        me.notify.error("Not permitted", response._error_message)
+                        me.notify.error("Oh snap! An error occurred during the facial verification. Please try again later.", response._error_message)
                     } else if (xhr.status === 500) {
                         $('#cover-spin').hide();
                         console.log(xhr)
                         let response = JSON.parse(xhr.responseText);
-                        me.notify.error("Error", response._error_message)
+                        me.notify.error("Whoops! Looks like something went awry during the facial verification. Please hold tight while we sort things out.", response._error_message)
                     } else {
                         $('#cover-spin').hide();
                         let error = null;
@@ -616,6 +650,12 @@ export default {
                 console.log(res)
             })
             me.notify.error("Please inform your in-line supervisor in person or via direct call about the issue and confirm attendance/exit.")
+        },
+        one_fm_enroll(){
+
+        },
+        one_fm_verify(){
+
         }
         // end
     }

@@ -2,8 +2,9 @@
 export default {
     name: 'utils',
     Frappe: class Frappe {
-        constructor(url, client_id){
+        constructor(url, client_id, face_recognition_url){
             this.url = url;
+            this.face_recognition_url = face_recognition_url
             this.client_id = client_id;
             this.grant_type= "password";
             this.token = '';
