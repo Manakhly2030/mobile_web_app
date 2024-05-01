@@ -17,8 +17,10 @@ import router from './router'
 
 import utils from './utils';
 
+const env = import.meta.env
+
 //Add your Frappe backend's URL
-const frappe = new utils.Frappe("http://localhost:8000", "id", "http://localhost:5000") //url and id goes in here
+const frappe = new utils.Frappe(env.VITE_ONE_FM_BASE_URL, "id", env.VITE_FACE_RECOGNITION_BASE_URL) //url and id goes in here
 const notify = new utils.Notify(Swal);
 
 
