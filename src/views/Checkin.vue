@@ -434,7 +434,6 @@ export default {
                 form_data.append("video_file", file, file_name);
                 form_data.append("username", me.employee_data.user_id);
                 form_data.append("filename", file_name)
-                form_data.append("bucketpath", "hello")
 
                 if(method == 'verify'){
                     // let {timestamp} = cur_page.page.page.position;
@@ -593,12 +592,6 @@ export default {
             })
             me.notify.error("Please inform your in-line supervisor in person or via direct call about the issue and confirm attendance/exit.")
         },
-        one_fm_enroll(){
-
-        },
-        one_fm_verify(){
-
-        }
         // end
     }
 }
