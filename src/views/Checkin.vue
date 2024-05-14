@@ -465,33 +465,34 @@ export default {
                         try {
                             r = JSON.parse(xhr.responseText);
                             if (!r.error){
-                                if (method == "enroll"){
-                                me.frappe.customApiCall(`api/method/one_fm.api.v1.face_recognition.enroll`, {employee_id:me.employee_data.employee_id}, 'POST').then(res=>{
-                                if([200, 201].includes(res.status_code)){
-                                    me.notify.success("Successful", res.data);
-                                }else if (res.status_code == 400){
-                                    me.notify.error("Error", res.error);
-                                } else{
-                                    me.notify.error("An error occurred during enrollment, Kindly contact admin")
+                                    if (method == "enroll"){
+                                        me.frappe.customApiCall(`api/method/one_fm.api.v1.face_recognition.enroll`, {employee_id:me.employee_data.employee_id}, 'POST').then(res=>{
+                                        if([200, 201].includes(res.status_code)){
+                                            me.notify.success("Successful", res.data);
+                                        }else if (res.status_code == 400){
+                                            me.notify.error("Error", res.error);
+                                        } else{
+                                            me.notify.error("An error occurred during enrollment, Kindly contact admin")
+                                        }
+                                })} else {
+                                        me.frappe.customApiCall('api/method/one_fm.api.v1.face_recognition.verify_checkin_checkout', {
+                                            employee_id: me.employee_data.employee_id,
+                                            log_type: log_type,
+                                            skip_attendance: skip_attendance,
+                                            latitude: me.page.position.coords.latitude,
+                                            longitude: me.page.position.coords.longitude
+                                        }, 'POST').then(res => {
+                                            if ([200, 201].includes(res.status_code)) {
+                                                me.notify.success("Successful", res.data);
+                                            } else if (res.status_code == 400) {
+                                                me.notify.error("Error", res.error);
+                                            } else {
+                                                me.notify.error("An error occurred during verification. Kindly contact admin");
+                                            }
+                                        });
                                 }
-                            })} else {
-                                me.frappe.customApiCall('api/method/one_fm.api.v1.face_recognition.verify_checkin_checkout', {
-                                    employee_id: me.employee_data.employee_id,
-                                    log_type: log_type,
-                                    skip_attendance: skip_attendance,
-                                    latitude: me.page.position.coords.latitude,
-                                    longitude: me.page.position.coords.longitude
-                                }, 'POST').then(res => {
-                                    if ([200, 201].includes(res.status_code)) {
-                                        me.notify.success("Successful", res.data);
-                                    } else if (res.status_code == 400) {
-                                        me.notify.error("Error", res.error);
-                                    } else {
-                                        me.notify.error("An error occurred during verification. Kindly contact admin");
-                                    }
-                                });
-                            }
                             } else {
+                                console.log(r.message)
                                 me.notify.error(r.message)
                             }
                             $('.verification').hide();  
