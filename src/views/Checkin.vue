@@ -492,6 +492,10 @@ export default {
                                         });
                                 }
                             } else {
+                                if (r.traceback){
+                                    me.frappe.customApiCall(`api/method/one_fm.api.v1.utils.log_error_via_api`, {message: r.message, traceback: r.traceback, medium: "Face Recognition System"}, 'POST').then(res=>{
+                                        console.log(res)
+                                })}
                                 console.log(r.message)
                                 me.notify.error(r.message)
                             }
