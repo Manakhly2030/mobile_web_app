@@ -9,26 +9,10 @@ import {  ref } from 'vue';
 export default {
     'name': 'ShiftPermissionDetail',
     computed:{
-      showTime(){
-        return ['Arrive Late','Leave Early'].includes(this.permission_type)
-      },
       isCheckin(){
         let label = null
         this.log_type=="IN"?  label =  true : label = false
         return label
-      },
-      getPermission(){
-        this.permission_type==''
-        if(!this.log_type){
-          return []
-        }
-        else if(this.log_type=="IN"){
-          return ["Arrive Late",'Forget to Checkin','Checkin Issue']
-        }
-        else if(this.log_type=="OUT"){
-          return ["Leave Early",'Forget to Checkout','Checkout Issue']
-        }
-        
       },
       
     },
@@ -38,7 +22,6 @@ export default {
           employee_id:null,
           leaving_time:null,
           employee_name:null,
-          permission_type:null,
           log_type:null,
           arrival_time:null,
           reason:null,
@@ -57,8 +40,6 @@ export default {
           employee_data: {},
           isReadonly:null,
           docstatus : null,
-          latitude:null,
-          longitude:null,
           dialogVisible:null,
           approvalVisible:null,
           isPageFrozen: false,
@@ -109,65 +90,65 @@ export default {
     unfreezePage() {
       this.isPageFrozen = false;
     },
-      getCurrentLocation(){
-            let me = this;
-            if (navigator.geolocation) {
-                window.markers = [];
-                window.circles = [];
+      // getCurrentLocation(){
+      //       let me = this;
+      //       if (navigator.geolocation) {
+      //           window.markers = [];
+      //           window.circles = [];
                 
-              navigator.geolocation.getCurrentPosition(
-                    position => {
-                        me.position = position;
+      //         navigator.geolocation.getCurrentPosition(
+      //               position => {
+      //                   me.position = position;
                         
-                        // check for get_site_lication before checkin
-                        this.latitude = String(position.coords.latitude)
-                        this.longitude = String(position.coords.longitude)
-                        // end check location
-                    },
-                    error => {
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                this.notify.html('Geolocation',`
-                                    <b>Please enable location permissions to proceed further.</b>
-                                    1. <b>Firefox</b>:
-                                    <br> Tools > Page Info > Permissions > Access Your Location. Select Always Ask.<br>
-                                    2. <b>Chrome</b>: 
-                                    <br> Hamburger Menu > Settings > Show advanced settings.<br> 
-                                        In the Privacy section, click Content Settings. <br>
-                                        In the resulting dialog, find the Location section and select Ask when a site tries to... .<br>
-                                        Finally, click Manage Exceptions and remove the permissions you granted to the sites you are interested in.<br><br>
-                                    `);
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                this.notify.error('Geolocation',"Location information is unavailable.");
-                                break;
-                            case error.TIMEOUT:
-                                this.notify.error('Geolocation',"The request to get user location timed out.");
-                                break;
-                            case error.UNKNOWN_ERROR:
-                                this.notify.error('Error',"An unknown error occurred.");
-                                break;
-                        }
-                    }
-                );
-            } else { 
-                this.notify.error('Geolocation',"Geolocation is not supported by this browser.");
-            }
+      //                   // check for get_site_lication before checkin
+      //                   this.latitude = String(position.coords.latitude)
+      //                   this.longitude = String(position.coords.longitude)
+      //                   // end check location
+      //               },
+      //               error => {
+      //                   switch(error.code) {
+      //                       case error.PERMISSION_DENIED:
+      //                           this.notify.html('Geolocation',`
+      //                               <b>Please enable location permissions to proceed further.</b>
+      //                               1. <b>Firefox</b>:
+      //                               <br> Tools > Page Info > Permissions > Access Your Location. Select Always Ask.<br>
+      //                               2. <b>Chrome</b>: 
+      //                               <br> Hamburger Menu > Settings > Show advanced settings.<br> 
+      //                                   In the Privacy section, click Content Settings. <br>
+      //                                   In the resulting dialog, find the Location section and select Ask when a site tries to... .<br>
+      //                                   Finally, click Manage Exceptions and remove the permissions you granted to the sites you are interested in.<br><br>
+      //                               `);
+      //                           break;
+      //                       case error.POSITION_UNAVAILABLE:
+      //                           this.notify.error('Geolocation',"Location information is unavailable.");
+      //                           break;
+      //                       case error.TIMEOUT:
+      //                           this.notify.error('Geolocation',"The request to get user location timed out.");
+      //                           break;
+      //                       case error.UNKNOWN_ERROR:
+      //                           this.notify.error('Error',"An unknown error occurred.");
+      //                           break;
+      //                   }
+      //               }
+      //           );
+      //       } else { 
+      //           this.notify.error('Geolocation',"Geolocation is not supported by this browser.");
+      //       }
             
-        },
+      //   },
       validateFields() {
         
         this.date = new Date(this.date).toISOString().slice(0, 10);
         let fieldsToCheck = []
         this.dialogVisible = false;
-        if(this.permission_type=='Arrive Late'){
-           fieldsToCheck=['employee_id', 'permission_type', 'log_type', 'date', 'reason','arrival_time'];
+        if(this.log_type=='IN'){
+           fieldsToCheck=['employee_id', 'log_type', 'date', 'reason','arrival_time'];
         }
-        else if(this.permission_type=='Leave Early'){
-           fieldsToCheck=['employee_id', 'permission_type', 'log_type', 'date', 'reason','leaving_time'];
+        else if(this.log_type=='OUT'){
+           fieldsToCheck=['employee_id', 'log_type', 'date', 'reason','leaving_time'];
         }
         else{
-           fieldsToCheck = ['employee_id', 'permission_type', 'log_type', 'date', 'reason'];
+           fieldsToCheck = ['employee_id', 'log_type', 'date', 'reason'];
         }
         const emptyFields = fieldsToCheck.filter((field) => {
           let field_value = this[field]
@@ -180,24 +161,15 @@ export default {
         else{
             let data = {
               'employee_id':this.employee_data.employee_id,
-              'permission_type':this.permission_type,
               'log_type':this.log_type,
               'date':this.date,
               'reason':this.reason
             }
-            if(this.permission_type=='Arrive Late'){
+            if(this.log_type=='IN'){
               data['arrival_time'] = this.arrival_time+':00'
             }
-            if(this.permission_type=='Leave Early'){
+            if(this.log_type=='OUT'){
               data['leaving_time'] = this.leaving_time+':00'
-            }
-            if(this.permission_type=='Checkin Issue'){
-              data['latitude'] = this.latitude
-              data['longitude'] = this.longitude
-            }
-            if(this.permission_type=='Checkout Issue'){
-              data['longitude'] = this.longitude
-              data['latitude'] = this.latitude
             }
             this.createShiftPermission(data)
         }  
@@ -261,16 +233,6 @@ export default {
           this.approvalVisible = true
         }
     },
-      handlePermTypeChange(){
-        
-        if(['Checkin Issue','Checkout Issue'].includes(this.permission_type)){
-          
-          this.getCurrentLocation()
-        }
-      },
-      handleLogTypeChange(){
-        this.permission_type = ''
-      },
       formatStrings(strings) {
         return strings.map((str) =>
           str
@@ -282,7 +244,7 @@ export default {
       async createShiftPermission(data){
         this.freezePage()
         this.frappe.customApiCall("api/method/one_fm.api.v1.shift_permission.create_shift_permission", {
-            employee_id: data['employee_id'],log_type: data['log_type'],permission_type: data['permission_type'],
+            employee_id: data['employee_id'],log_type: data['log_type'],
             date: data['date'],reason: data['reason'],leaving_time: data['leaving_time'],
             arrival_time: data['arrival_time'],latitude: data['latitude'],longitude: data['longitude']}, 'POST').then(res=>{
               if (res.status_code==201){
@@ -318,14 +280,10 @@ export default {
             this.frappe.customApiCall("api/method/one_fm.api.v1.shift_permission.shift_permission_details", {
             shift_permission_id: this.id}, 'POST').then(res=>{
           if (res.status_code==200){
-            
             this.employee_id= res.data.employee
             this.employee_name= res.data.emp_name
             this.date = res.data.date
-            this.permission_type = res.data.permission_type
             this.log_type = res.data.log_type
-            this.latitude = res.data.latitude
-            this.longitude = res.data.longitude
             if(res.data.arrival_time){
               if(res.data.arrival_time.length<8){
               this.arrival_time= '0'+res.data.arrival_time
@@ -346,7 +304,6 @@ export default {
               this.leaving_time= res.data.leaving_time
             }
             }
-            this.reason= res.data.reason
             this.shift_assignment= res.data.assigned_shift
             this.shift_type= res.data.shift_type
             this.shift= res.data.shift
@@ -443,25 +400,14 @@ export default {
                       :items="['IN','OUT']"  ></v-select>
                   </div>    
                 </div>
-                <div class="col-md-6">
-                  <div class="form-group first">
-                    <v-select
-                    style="background-color: white;"
-                      clearable
-                      :readonly="isReadonly"
-                      :label="'Permission Type'"  v-model="permission_type"
-                      @update:modelValue="handlePermTypeChange"
-                      :items="getPermission"  ></v-select>
-                  </div>    
-                </div>
               </div>
               <div class="row">
                 <div v-if ="showTime" class="col-md-6">
                   <div class="form-group first">
-                    <label v-if="permission_type==='Arrive Late'">Arrival Time</label>
-                    <label v-else-if="permission_type==='Leave Early'">Leaving Time</label>
-                    <input style="background-color: white;" v-if="permission_type==='Arrive Late'" v-model = "arrival_time"   type="time" :readonly="isReadonly"  class="form-control"  >
-                    <input  style="background-color: white;" v-else-if="permission_type==='Leave Early'" v-model = "leaving_time"   type="time" :readonly="isReadonly"  class="form-control" >      
+                    <label v-if="log_type==='IN'">Arrival Time</label>
+                    <label v-else-if="log_type==='OUT'">Leaving Time</label>
+                    <input style="background-color: white;" v-if="log_type==='IN'" v-model = "arrival_time"   type="time" :readonly="isReadonly"  class="form-control"  >
+                    <input  style="background-color: white;" v-else-if="log_type==='OUT'" v-model = "leaving_time"   type="time" :readonly="isReadonly"  class="form-control" >      
                   </div>    
                 </div>
                 <div class="col-md-6">
@@ -479,18 +425,6 @@ export default {
                 <div class="col-md-6">
                   <div class="form-group first">
                     <v-text-field style="background-color: white;" :readonly="true" v-model = "approver_name" label="Approver Name"></v-text-field>
-                  </div>    
-                </div>
-              </div>
-              <div v-if="permission_type=='Checkin Issue'||permission_type=='Checkout Issue'" class="row">
-                <div class="col-md-6">
-                  <div class="form-group first">
-                    <v-text-field style="background-color: white;" :readonly="true" v-model = "latitude" label="Latitude"></v-text-field>
-                  </div>    
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group first">
-                    <v-text-field style="background-color: white;" :readonly="true" v-model = "longitude" label="Longitude "></v-text-field>
                   </div>    
                 </div>
               </div>
