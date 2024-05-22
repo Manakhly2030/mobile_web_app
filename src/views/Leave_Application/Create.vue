@@ -110,7 +110,14 @@ export default {
           var file =  event.target.files[0]
           let result = await this.convertToBase64(file);
           this.proof_document.attachment_name = event.target.files[0].name
-          this.proof_document.attachment = result.replace('data:application/pdf;base64,','')  
+          let file_type = event.target.files[0].type
+          if(file_type==='image/png'){
+            this.proof_document.attachment = result.replace('data:image/png;base64,','')
+          }
+          else{
+            this.proof_document.attachment = result.replace('data:application/pdf;base64,','')  
+          }
+            
         },
         convertToBase64(file) {
           return new Promise((resolve, reject) => {
