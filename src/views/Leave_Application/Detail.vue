@@ -1,6 +1,7 @@
 <script type="module">
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
+import DisplayFile from '@/components/DisplayFile.vue'
 
 export default {
     'name': 'LeaveApplicationDetails',
@@ -14,10 +15,11 @@ export default {
           from_date: "",
           to_date: "",
           leave_balance: "",
-          proof_document: "",
+          proof_documents: "",
           reason: "",
           approver: "",
           applied_by: "",
+          isOpen: false,     
         }
     },
     mounted(){
@@ -29,7 +31,8 @@ export default {
     },
     components: {
       Header,
-      Footer
+      Footer,
+      DisplayFile
     },
     methods:{
       async getData(){
@@ -46,7 +49,8 @@ export default {
             this.from_date = res.data.from_date
             this.to_date = res.data.to_date
             this.total_leave_days = res.data.total_leave_days
-            this.proof_document = res.data.proof_document
+            this.proof_documents = res.data.proof_documents
+
             this.reason = res.data.reason
             this.approver = res.data.leave_approver
           }
@@ -67,7 +71,11 @@ export default {
             }
 
           })
-      }     
+      },
+      displayFile(){
+          $('#DisplayFileModal').show();
+          this.isOpen = true; // Emit an event to open the modal
+      }
     }
 }
 
@@ -111,8 +119,21 @@ export default {
                     <h4>  Total Leave Days:</h4> <h5 style="margin-left: auto;">{{this.total_leave_days}}</h5> 
                   </div>
                   
-                  <div v-if="this.proof_document" style="display:flex; padding:10px">
-                    <h4 > Proof Document: </h4> <h5 style="margin-left: auto;">{{this.proof_document}}</h5>
+                  <div v-if="this.proof_documents" style="display:flex; padding:10px; flex-direction: column;">
+                    <h4> Proof Document: </h4>
+                    <table v-for="files in this.proof_documents" class="table table-sm table-striped" style="margin-top:0px;">
+                        <tbody>
+                          <tr>
+                              <td class="text-dark bg-white">
+                                  <div class="icon-box ">
+                                      <ion-icon name="attach-outline"></ion-icon>
+                                  </div>
+                              </td>
+                              <td class="px-0 text-dark bg-white text-center" ><a @click="displayFile()">{{files.file_name}}</a></td>
+                              <DisplayFile v-if="isOpen=true"  :file_name="files.file_name" :docname="this.name"/>
+                            </tr>    
+                        </tbody>
+                    </table>
                   </div>
 
                   <div v-if="this.reason" style="display:flex; padding:10px">
