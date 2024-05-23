@@ -233,6 +233,9 @@ export default {
           this.approvalVisible = true
         }
     },
+    handleLogTypeChange(event){
+      this.from_date = event.target.value
+    },
       formatStrings(strings) {
         return strings.map((str) =>
           str
@@ -396,7 +399,7 @@ export default {
                       clearable
                       :readonly="isReadonly"
                       :label="'Log Type'"  v-model="log_type"
-                      @update:modelValue="handleLogTypeChange"
+                      @update:modelValue="handleLogTypeChange($event)"
                       :items="['IN','OUT']"  ></v-select>
                   </div>    
                 </div>
