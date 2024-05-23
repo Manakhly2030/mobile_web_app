@@ -246,7 +246,7 @@ export default {
         this.frappe.customApiCall("api/method/one_fm.api.v1.shift_permission.create_shift_permission", {
             employee_id: data['employee_id'],log_type: data['log_type'],
             date: data['date'],reason: data['reason'],leaving_time: data['leaving_time'],
-            arrival_time: data['arrival_time'],latitude: data['latitude'],longitude: data['longitude']}, 'POST').then(res=>{
+            arrival_time: data['arrival_time']}, 'POST').then(res=>{
               if (res.status_code==201){
                 this.unfreezePage()
                 this.$router.push({ name: 'shift_permission_list' });
