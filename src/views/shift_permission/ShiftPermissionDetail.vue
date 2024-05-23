@@ -9,6 +9,7 @@ import {  ref } from 'vue';
 export default {
     'name': 'ShiftPermissionDetail',
     computed:{
+      
       isCheckin(){
         let label = null
         this.log_type=="IN"?  label =  true : label = false
@@ -233,9 +234,7 @@ export default {
           this.approvalVisible = true
         }
     },
-    handleLogTypeChange(event){
-      this.from_date = event.target.value
-    },
+    
       formatStrings(strings) {
         return strings.map((str) =>
           str
@@ -313,7 +312,7 @@ export default {
             this.is_new = false
             this.roster_type= res.data.roster_type
             this.approver= res.data.shift_supervisor
-            
+            this.reason = res.data.reason
             this.approver_name= res.data.approver_name
             this.workflow_state = res.data.workflow_state
             this.docstatus = res.data.docstatus
@@ -399,13 +398,13 @@ export default {
                       clearable
                       :readonly="isReadonly"
                       :label="'Log Type'"  v-model="log_type"
-                      @update:modelValue="handleLogTypeChange($event)"
+                      
                       :items="['IN','OUT']"  ></v-select>
                   </div>    
                 </div>
               </div>
               <div class="row">
-                <div v-if ="showTime" class="col-md-6">
+                <div class="col-md-6">
                   <div class="form-group first">
                     <label v-if="log_type==='IN'">Arrival Time</label>
                     <label v-else-if="log_type==='OUT'">Leaving Time</label>
