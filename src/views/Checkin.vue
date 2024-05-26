@@ -430,9 +430,10 @@ export default {
         upload_file(file, method, log_type, skip_attendance){
             $('#cover-spin').show();
             let me = this;
+            let prefix = me.frappe.url + "/api/method/one_fm.api.v1.face_recognition." 
             let method_map = {
-                'enroll': me.frappe.face_recognition_url + "/enroll",
-                'verify': me.frappe.face_recognition_url + "/verify"
+                'enroll': prefix + "enroll",
+                'verify': prefix + "verify_checkin_checkout"
             }
             return new Promise((resolve, reject) => {
                 let xhr = new XMLHttpRequest();
@@ -442,9 +443,9 @@ export default {
                 xhr.setRequestHeader("Authorization", JSON.parse(localStorage.frappeUser).token);
 
                 let form_data = new FormData();
-                const file_name = me.employee_data.user_id + ".mp4"
+                const file_name = me.employee_data.employee_id + ".mp4"
                 form_data.append("video_file", file, file_name);
-                form_data.append("username", me.employee_data.user_id);
+                form_data.append("employee_id", me.employee_data.employee_id);
                 form_data.append("filename", file_name)
 
                 if(method == 'verify'){
@@ -464,42 +465,7 @@ export default {
                         let r = null;
                         try {
                             r = JSON.parse(xhr.responseText);
-                            if (!r.error){
-                                    if (method == "enroll"){
-                                        me.frappe.customApiCall(`api/method/one_fm.api.v1.face_recognition.enroll`, {employee_id:me.employee_data.employee_id}, 'POST').then(res=>{
-                                        if([200, 201].includes(res.status_code)){
-                                            me.notify.success("Successful", res.data);
-                                        }else if (res.status_code == 400){
-                                            me.notify.error("Error", res.error);
-                                        } else{
-                                            me.notify.error("An error occurred during enrollment, Kindly contact admin")
-                                        }
-                                })} else {
-                                        me.frappe.customApiCall('api/method/one_fm.api.v1.face_recognition.verify_checkin_checkout', {
-                                            employee_id: me.employee_data.employee_id,
-                                            log_type: log_type,
-                                            skip_attendance: skip_attendance,
-                                            latitude: me.page.position.coords.latitude,
-                                            longitude: me.page.position.coords.longitude
-                                        }, 'POST').then(res => {
-                                            if ([200, 201].includes(res.status_code)) {
-                                                me.notify.success("Successful", res.data);
-                                            } else if (res.status_code == 400) {
-                                                me.notify.error("Error", res.error);
-                                            } else {
-                                                me.notify.error("An error occurred during verification. Kindly contact admin");
-                                            }
-                                        });
-                                }
-                            } else {
-                                if (r.traceback){
-                                    console.log(r.traceback)
-                                    me.frappe.customApiCall(`api/method/one_fm.api.v1.utils.log_error_via_api`, {message: r.message, traceback: r.traceback, medium: "Face Recognition System"}, 'POST').then(res=>{
-                                        console.log(res)
-                                })}
-                                console.log(r.message)
-                                me.notify.error(r.message)
-                            }
+                            me.notify.success("Successful", r.data);
                             $('.verification').hide();  
                             // me.initialize()
                             me.$router.push('/checkin');
@@ -511,8 +477,8 @@ export default {
                         }
                     } else if (xhr.status === 400) {
                         $('#cover-spin').hide();
-                        // let response = JSON.parse(xhr.responseText);
-                        me.notify.error("Face not recognized. Please try again.")
+                        let response = JSON.parse(xhr.responseText);
+                        me.notify.error(response.error)
                         me.$router.push('/checkin');
                             setTimeout(()=>{
                                window.location.href='/checkin' 
