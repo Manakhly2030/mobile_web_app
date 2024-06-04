@@ -42,10 +42,10 @@ export default {
           employee_id: this.employee_data.employee_id}, 'POST').then(res=>{
           if (res.message != "Resource Not Found"){
              var options = []
-            for(let r in res.data){
-                options.push({ text: res.data[r], value: res.data[r] })
+              for(let r in res.data){
+                options.push({ text: r, value: r })
               }
-              
+            
             this.leaveTypeOptions = options
             document.getElementById("fromDate").min = new Date().toISOString().split("T")[0];
             document.getElementById("toDate").min = new Date().toISOString().split("T")[0];
