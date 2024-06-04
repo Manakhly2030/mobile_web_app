@@ -97,12 +97,14 @@ export default {
         submit : function(){
           this.frappe.customApiCall("api/method/one_fm.api.v1.leave_application.create_new_leave_application",{
             "employee_id": this.employee_data.employee_id, "from_date": this.from_date, "to_date": this.to_date, "leave_type": this.leave_type, "reason": this.reason, "proof_document": JSON.stringify([this.proof_document])}, 'POST').then(res=>{
-                if (res.message === "Success"){
+              
+              if (res.message === "Success"){
                   this.notify.success("Successfully Applied!")
                   window.location.reload();
 
-                } else {
-                  this.notify.error('Error', res.message)
+                } 
+                else {
+                  this.notify.error('Error', res.error)
                 }
             })
         },
