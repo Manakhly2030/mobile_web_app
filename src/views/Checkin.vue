@@ -234,7 +234,7 @@ export default {
             let me = this;
             if (me.page.enrolled){
                 // Get current location again and then resume the checkin/out process
-                me.get_location(me.page, () => me.upload_file(videoBlob, "verify", me.res.data.log_type, 0))
+                me.upload_file(videoBlob, "verify", me.res.data.log_type, 0)
             } else {
                 me.upload_file(videoBlob, "enroll", me.res.data.log_type, 0)
             }
