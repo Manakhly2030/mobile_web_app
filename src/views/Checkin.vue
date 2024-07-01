@@ -4,6 +4,7 @@ import { getCurrentInstance } from 'vue'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import VideoJSRecord from '@/components/VideoJSRecord.vue'
+import CheckinIssue from '../components/CheckinIssue.vue'
 
 export default {
     'name': 'Checkin',
@@ -16,7 +17,11 @@ export default {
           recordTimer: 0,
           shift: {
             site_name: ''
-          }
+          },
+          longitude: 0,
+          latitude :0,
+          log_type: 'IN',
+          isOpen: false,     
         }
     },
     mounted(){
@@ -32,7 +37,8 @@ export default {
     components: {
       Header,
       Footer,
-      VideoJSRecord
+      VideoJSRecord,
+      CheckinIssue,
     },
     methods:{
         async initialize(){
@@ -91,8 +97,13 @@ export default {
             }, false);		
 
         },
+        openModal() {
+            $('#CheckinIssueModal').show();
+            this.isOpen = true; // Emit an event to open the modal
+        },
         ready_checkin(res){
             let me = this;
+            this.log_type = me.res.data.log_type
             $('#profile-card').show();
             if (me.page.enrolled){
                 this.recordTimer = 5;
@@ -180,11 +191,12 @@ export default {
                 navigator.geolocation.getCurrentPosition(
                     position => {
                         page.position = position;
-
+                        this.longitude = position.coords.longitude
+                        this.latitude = position.coords.latitude
                         // check for get_site_lication before checkin
                         me.frappe.customApiCall(`api/method/one_fm.api.v1.face_recognition.get_site_location`,
-                            {employee_id:me.employee_data.employee_id, latitude:position.coords.latitude,
-                            longitude:position.coords.longitude}, 'POST').then(res=>{
+                            {employee_id:me.employee_data.employee_id, latitude:this.latitude,
+                            longitude:this.longitude}, 'POST').then(res=>{
                                 if(res.status_code==200){
                                     if (res.data.user_within_geofence_radius){
                                         me.res = res;
@@ -232,13 +244,13 @@ export default {
         },
         process_video(videoBlob){
             let me = this;
+            $('#cover-spin').show();
             if (me.page.enrolled){
                 // Get current location again and then resume the checkin/out process
-                me.get_location(me.page, () => me.upload_file(videoBlob, "verify", me.res.data.log_type, 0))
+                me.get_location(me.page, () => me.upload_file(videoBlob, "verify", me.res.data.log_type, 1))
             } else {
-                me.upload_file(videoBlob, "enroll", me.res.data.log_type, 0)
+                me.upload_file(videoBlob, "enroll")
             }
-            
         },
         load_gmap(position){
             let me = this;
@@ -418,9 +430,10 @@ export default {
         upload_file(file, method, log_type, skip_attendance){
             $('#cover-spin').show();
             let me = this;
+            let prefix = me.frappe.url + "/api/method/one_fm.api.v1.face_recognition." 
             let method_map = {
-                'enroll': me.frappe.url+'/api/method/one_fm.api.v1.web.enroll',
-                'verify': me.frappe.url+'/api/method/one_fm.api.v1.web.verify'
+                'enroll': prefix + "enroll",
+                'verify': prefix + "verify_checkin_checkout"
             }
             return new Promise((resolve, reject) => {
                 let xhr = new XMLHttpRequest();
@@ -430,8 +443,11 @@ export default {
                 xhr.setRequestHeader("Authorization", JSON.parse(localStorage.frappeUser).token);
 
                 let form_data = new FormData();
-                form_data.append("file", file, me.employee_data.user_id+".mp4");
+                const file_name = me.employee_data.employee_id + ".mp4"
+                form_data.append("video_file", file, file_name);
                 form_data.append("employee_id", me.employee_data.employee_id);
+                form_data.append("filename", file_name)
+
                 if(method == 'verify'){
                     // let {timestamp} = cur_page.page.page.position;
                     let {latitude, longitude} = me.page.position.coords;
@@ -440,7 +456,7 @@ export default {
                     // form_data.append("timestamp", timestamp);
                     form_data.append("log_type", log_type);
                     form_data.append("skip_attendance", skip_attendance);
-                } 
+                }
 
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState == XMLHttpRequest.DONE) {
@@ -449,9 +465,7 @@ export default {
                         let r = null;
                         try {
                             r = JSON.parse(xhr.responseText);
-                            console.log(r);
                             me.notify.success("Successful", r.data);
-                            // if(method=="verify"){}
                             $('.verification').hide();  
                             // me.initialize()
                             me.$router.push('/checkin');
@@ -461,15 +475,23 @@ export default {
                         } catch (e) {
                             r = xhr.responseText;
                         }
+                    } else if (xhr.status === 400) {
+                        $('#cover-spin').hide();
+                        let response = JSON.parse(xhr.responseText);
+                        me.notify.error(response.error)
+                        me.$router.push('/checkin');
+                            setTimeout(()=>{
+                               window.location.href='/checkin' 
+                            }, 4000)
                     } else if (xhr.status === 403) {
                         $('#cover-spin').hide();
                         let response = JSON.parse(xhr.responseText);
-                        me.notify.error("Not permitted", response._error_message)
+                        me.notify.error("Oh snap! An error occurred during the facial verification. Please try again later.", response._error_message)
                     } else if (xhr.status === 500) {
                         $('#cover-spin').hide();
                         console.log(xhr)
                         let response = JSON.parse(xhr.responseText);
-                        me.notify.error("Error", response._error_message)
+                        me.notify.error("Whoops! Looks like something went awry during the facial verification. Please hold tight while we sort things out.", response._error_message)
                     } else {
                         $('#cover-spin').hide();
                         let error = null;
@@ -553,7 +575,7 @@ export default {
                 console.log(res)
             })
             me.notify.error("Please inform your in-line supervisor in person or via direct call about the issue and confirm attendance/exit.")
-        }
+        },
         // end
     }
 }
@@ -583,6 +605,14 @@ export default {
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-xs-12">
+                                        <button class="btn btn-sm btn-primary btn-start" @click="openModal()">
+                                            Not Working? Click here.
+                                        </button>
+                                        <CheckinIssue v-if="isOpen=true"  :log_type="this.log_type"  :longitude="this.longitude" :latitude="this.latitude"/>
+                                    </div>
                             </div>
                             <div id="button-controls">
                                 <div class="row"  id="enrollSection">
@@ -614,13 +644,6 @@ export default {
                                     <div class="col-xs-12">
                                         <button class="btn btn-sm btn-warning btn-start" id="hourlyButton">
                                             Hourly Check In
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-xs-12">
-                                        <button class="btn btn-sm btn-primary btn-start" id="errorButton">
-                                            Not Working? Click here.
                                         </button>
                                     </div>
                                 </div>
