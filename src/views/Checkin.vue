@@ -170,7 +170,6 @@ export default {
             me.ready_checkin(me.res);
 
         },
-
         get_location(page, execute_func){
             let me = this;
             if (navigator.geolocation) {
@@ -464,7 +463,10 @@ export default {
                     } else if (xhr.status === 403) {
                         $('#cover-spin').hide();
                         let response = JSON.parse(xhr.responseText);
-                        me.notify.error("Not permitted", response._error_message)
+                        const errorMessage = `
+                        Not Permitted <a href="/checkin-issue/${latitude}/${longitude}/${log_type}" style="color: #ff9900; text-decoration: underline;">Go to Check-in Page</a>
+                        `;
+                        me.notify.error(title, errorMessage, { html: true });
                     } else if (xhr.status === 500) {
                         $('#cover-spin').hide();
                         console.log(xhr)
@@ -553,8 +555,7 @@ export default {
                 console.log(res)
             })
             me.notify.error("Please inform your in-line supervisor in person or via direct call about the issue and confirm attendance/exit.")
-        }
-        // end
+        },
     }
 }
 </script>
