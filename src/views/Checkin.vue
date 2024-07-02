@@ -181,7 +181,6 @@ export default {
             me.ready_checkin(me.res);
 
         },
-
         get_location(page, execute_func){
             let me = this;
             if (navigator.geolocation) {
@@ -459,6 +458,7 @@ export default {
                 }
 
                 xhr.onreadystatechange = () => {
+                    let {latitude, longitude} = me.page.position.coords;
                     if (xhr.readyState == XMLHttpRequest.DONE) {
                         $('#cover-spin').hide();
                         if ([200, 201].includes(xhr.status)) {
@@ -478,20 +478,30 @@ export default {
                     } else if (xhr.status === 400) {
                         $('#cover-spin').hide();
                         let response = JSON.parse(xhr.responseText);
-                        me.notify.error(response.error)
+                        // me.notify.error(response.error)
+                        const errorMessage = `
+                        ${response.error}<br> <a href="/checkin-issue/${latitude}/${longitude}/${log_type}" style="color: #ff9900; text-decoration: underline;">Click here to create a checkin issue</a>
+                        `;
+                        me.notify.error(errorMessage, { html: true });
                         me.$router.push('/checkin');
                             setTimeout(()=>{
                                window.location.href='/checkin' 
-                            }, 4000)
+                            }, 10000)
                     } else if (xhr.status === 403) {
                         $('#cover-spin').hide();
                         let response = JSON.parse(xhr.responseText);
-                        me.notify.error("Oh snap! An error occurred during the facial verification. Please try again later.", response._error_message)
+                        const errorMessage = `
+                        Oh snap! An error occurred during the facial verification. Please try again later. <a href="/checkin-issue/${latitude}/${longitude}/${log_type}" style="color: #ff9900; text-decoration: underline;">Click here to create a checkin issue</a>
+                        `;
+                        me.notify.error(errorMessage, { html: true });
                     } else if (xhr.status === 500) {
                         $('#cover-spin').hide();
                         console.log(xhr)
                         let response = JSON.parse(xhr.responseText);
-                        me.notify.error("Whoops! Looks like something went awry during the facial verification. Please hold tight while we sort things out.", response._error_message)
+                        const errorMessage = `
+                        Whoops! Looks like something went awry during the facial verification. Please hold tight while we sort things out.. <a href="/checkin-issue/${latitude}/${longitude}/${log_type}" style="color: #ff9900; text-decoration: underline;">Click here to create a checkin issue</a>
+                        `;
+                        me.notify.error(errorMessage, { html: true });
                     } else {
                         $('#cover-spin').hide();
                         let error = null;
@@ -576,7 +586,6 @@ export default {
             })
             me.notify.error("Please inform your in-line supervisor in person or via direct call about the issue and confirm attendance/exit.")
         },
-        // end
     }
 }
 </script>
