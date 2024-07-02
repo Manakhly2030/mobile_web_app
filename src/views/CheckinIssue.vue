@@ -48,16 +48,19 @@ export default{
                     longitude :this.$route.params.longitude,
                     log_type : this.$route.params.log_type,
                 }, 'POST').then(res=>{
-                    console.log(res)
-                    if (res.status_code === 200) {
-                        this.notify.success("Success")
+                    const route = (res.status_code === 201) ? '/home' : '/checkin';
+                    if (res.status_code === 201) {
+                        this.notify.success("Checkin Issue Created Successfuly", )
+                        const route = '/home'
                     } else {
                         console.log(res.error)
                         this.notify.error(res.error,)
+                        const route = '/checkin'
                     }
+                    this.$router.push(route);
+                    setTimeout(()=>{window.location.href=route}, 5000)
                 })
-                me.$router.push('/checkin');
-                setTimeout(()=>{window.location.href='/checkin' }, 10000)
+                
         }
     }
 }
