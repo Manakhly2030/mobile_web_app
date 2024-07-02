@@ -1,16 +1,18 @@
+importScripts('/sw-env.js');
 importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
 importScripts(
   "https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"
 );
 
 firebase.initializeApp({
-  apiKey: "AIzaSyCAPgYuYu15f_EAk7f8xLu0Brkx4K_kTs4",
-  authDomain: "one-fm-mobile-web-app.firebaseapp.com",
-  projectId: "one-fm-mobile-web-app",
-  storageBucket: "one-fm-mobile-web-app.appspot.com",
-  messagingSenderId: "256258706751",
-  appId: "1:256258706751:web:5dd888a861dec84511578a",
-  measurementId: "G-FQD615CL3T",
+  apiKey: self.__env.VITE_FIREBASE_API_KEY,
+  authDomain: self.__env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: self.__env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: self.__env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: self.__env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: self.__env.VITE_FIREBASE_APP_ID,
+  measurementId: self.__env.VITE_FIREBASE_MEASUREMENT_ID,
+  vapidKey: self.__env.VITE_FIREBASE_VAPID_KEY,
 });
 
 const messaging = firebase.messaging();

@@ -24,12 +24,9 @@ const { proxy } = getCurrentInstance();
 onMounted(() => {
   Notification.requestPermission().then((permission) => {
     if (permission === "granted") {
-      console.log("Notification permission granted.");
-
       getToken(messaging, { vapidKey: firebaseConfig.vapidKey })
         .then((currentToken) => {
           if (currentToken) {
-            console.log("Token: ", currentToken);
             const loggedInUser = proxy.get_logged_in_user();
 
             if (loggedInUser) {
@@ -37,17 +34,17 @@ onMounted(() => {
                 .customApiCall(
                   "api/method/one_fm.api.api.store_fcm_token",
                   {
-                    employee_id: loggedInUser.employee_data.employee_id,
+                    employee_id: loggedInUser.employee_data.name,
                     fcm_token: currentToken,
                     device_os: "Web",
                   },
                   "POST"
                 )
                 .then((res) => {
-                  if (res.status_code == 200) {
+                  if (res.message) {
                     console.log("Stored FCM Token");
                   } else {
-                    this.notify.error("Error", res.message);
+                    proxy.notify.error("Error", res.message);
                   }
                 });
             }
@@ -62,7 +59,6 @@ onMounted(() => {
         });
 
       onMessage(messaging, (payload) => {
-        console.log("Message received. ", payload);
         const notificationTitle =
           payload?.notification?.title || "Notification";
         const notificationOptions = {

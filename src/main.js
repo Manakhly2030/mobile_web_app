@@ -61,6 +61,9 @@ app.config.globalProperties.is_logged_in = ()=>{
     }
     
 }
+app.config.globalProperties.get_logged_in_user = ()=>{
+    return localStorage.frappeUser ? JSON.parse(localStorage.frappeUser) : null
+}
 app.use(createPinia())
 app.use(router)
 app.use(vuetify)
