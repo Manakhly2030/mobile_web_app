@@ -1,4 +1,9 @@
-<script>
+<script type="module">
+
+import Header from '@/components/Header.vue'
+import Footer from '@/components/Footer.vue'
+
+
 export default{
     'name': 'CheckinIssue',
     data() {
@@ -15,8 +20,10 @@ export default{
     this.employee_data = JSON.parse(localStorage.frappeUser).employee_data;
     this.initialize();
   },
-
-
+  components: {
+      Header,
+      Footer,
+    },
     methods: {
         initialize() {
                 let me = this;
