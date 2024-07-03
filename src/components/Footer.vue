@@ -241,6 +241,17 @@ export default {
                         
                         </li>
                         <li>
+                            <a href="/checkin-issue" class="item">
+                                <div class="icon-box ">
+                                    <ion-icon name="pricetag-outline"></ion-icon>
+                                </div>
+                                <div class="in">
+                                    Checkin Issue
+                                </div>
+                            </a>
+                        </li>
+
+                        <li>
                             <a href="/" class="item">
                                 <div class="icon-box ">
                                     <ion-icon name="log-out-outline"></ion-icon>
