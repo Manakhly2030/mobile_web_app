@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node swEnvBuild.js && vite build",
     "preview": "vite preview",
     "test:unit": "vitest --environment jsdom --root src/",
     "test:e2e": "start-server-and-test preview :4173 'cypress run --e2e'",
@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@vuepic/vue-datepicker": "^7.4.1",
+    "dotenv": "^16.4.5",
+    "firebase": "^10.12.2",
     "pinia": "^2.0.28",
     "sweetalert2": "^11.7.2",
     "videojs-record": "^4.6.0",
