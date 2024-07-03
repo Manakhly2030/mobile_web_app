@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/views/authentication/Login.vue'
 import Home from '@/views/Home.vue'
 import Checkin from '@/views/Checkin.vue'
-import CheckinIssue from '@/views/CheckinIssue.vue'
+import CheckinIssue from '@/views/EmployeeCheckinIssue/Create.vue'
+import CheckinIssueList from '@/views/EmployeeCheckinIssue/List.vue'
 import CheckinHistory from '@/views/CheckinHistory.vue'
 import Notification from '@/views/Notification.vue'
 import ApplyLeaveApplication from '@/views/Leave_Application/Create.vue'
@@ -21,6 +22,7 @@ const router = createRouter({
     { path: '/home', name: 'home', component: Home},
     { path: '/checkin', name: 'checkin', component: Checkin},
     { path: '/checkin_history', name: 'checkin_history', component: CheckinHistory},
+    { path: '/checkin-issue/', name: 'checkin_issue_list', component: CheckinIssueList},
     { path: '/checkin-issue/:latitude/:longitude/:log_type', name: 'checkin_issue', component: CheckinIssue},
     { path: '/shift_permission_list', name: 'shift_permission_list', component: ShiftPermissionList},
     { path: '/shift_permission/:id', name: 'shift_permission', component: ShiftPermissionDetail},
