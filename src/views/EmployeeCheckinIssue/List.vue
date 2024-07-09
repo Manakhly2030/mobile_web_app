@@ -23,7 +23,7 @@ export default {
     },
     methods:{
       async getData(){
-        this.frappe.customApiCall("api/method/one_fm.api.v1.employee_checkin_issue.get_employee_checkin_issue",{}, 'GET').then(res=>{
+        this.frappe.customApiCall("api/method/one_fm.api.v1.employee_checkin_issue.list_employee_checkin_issue",{employee_id: this.employee_data.employee_id}, 'POST').then(res=>{
           if (res.status_code == 200){
             this.employee_checkin_issue = res.data
           } else {
@@ -32,6 +32,9 @@ export default {
           }
         })
       },
+      viewDetails(eci_id){
+        this.$router.push({ path: `/checkin-issue-details/${eci_id}` })
+      }
     }
 }
 
