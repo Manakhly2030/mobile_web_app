@@ -58,7 +58,6 @@ export default {
         // End get leave 
       },
       TakeAction(status){
-        console.log(status)
         this.frappe.customApiCall("api/method/one_fm.api.v1.leave_application.leave_approver_action",{
           leave_id: this.name, status: status}, 'POST').then(res=>{
             console.log(res)
